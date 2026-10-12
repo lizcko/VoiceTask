@@ -3,7 +3,24 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "scripts": { "dev": "vite --host 0.0.0.0", "build": "tsc -b && vite build", "preview": "vite preview --host 0.0.0.0", "test": "tsc src/calendar.ts --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --outDir .tools/test-build && node --test tests/calendar.test.mjs" },
-  "dependencies": { "react": "^19.1.0", "react-dom": "^19.1.0", "lucide-react": "^0.468.0" },
-  "devDependencies": { "@types/react": "^19.1.0", "@types/react-dom": "^19.1.0", "@vitejs/plugin-react": "^4.4.1", "typescript": "~5.8.3", "vite": "^6.3.5" }
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "tsc src/calendar.ts src/model.ts --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --outDir .tools/test-build && node --test tests/calendar.test.mjs tests/model.test.mjs",
+    "typecheck": "tsc --noEmit",
+    "test:browser": "node tests/browser.test.mjs"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "lucide-react": "^0.468.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.4.1",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5"
+  }
 }

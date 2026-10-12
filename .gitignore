@@ -1,0 +1,43 @@
+node_modules/
+dist/
+.tools/
+*.tsbuildinfo
+
+# Environment variables and private configuration
+.env
+.env.*
+.npmrc
+.yarnrc
+.yarnrc.yml
+secrets/
+credentials/
+credentials.json
+*.secrets.json
+service-account*.json
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local agent, cloud, editor and operating-system files
+.agents/
+.codex/
+.aws/
+.vscode/
+.idea/
+*.local
+*.log
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary files, caches and reports
+.cache/
+.vite/
+coverage/
+playwright-report/
+test-results/
+*.tmp
+*.bak
+*.swp
+*.swo
