@@ -1,4 +1,4 @@
-export type Entry = { id: string; title: string; type: 'task' | 'meeting'; date: string; time: string; duration: number; color: string; important: boolean; description: string };
+export type Entry = { id: string; title: string; type: 'task' | 'meeting'; date: string; time: string; duration: number; color: string; important: boolean; description: string; comment?: string; completed?: boolean; startAt?: string; endAt?: string };
 export const colors = ['#ddd8f5', '#d8eae2', '#f7e5cf', '#d7e7f8', '#f2dce1'];
 export function dateKey(date: Date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
 export function fromKey(key: string) { return new Date(`${key}T12:00:00`); }
@@ -25,16 +25,21 @@ export function seedEntries(): Entry[] {
 export function validEntry(value: unknown): value is Entry {
   if (!value || typeof value !== 'object') return false;
   const v = value as Entry;
-  return typeof v.id === 'string' && typeof v.title === 'string' && v.title.trim().length > 0 && ['task', 'meeting'].includes(v.type) && typeof v.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v.date) && !isNaN(fromKey(v.date).getTime()) && dateKey(fromKey(v.date)) === v.date && typeof v.time === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(v.time) && Number.isFinite(v.duration) && v.duration >= 15 && minutes(v.time) + v.duration <= 1440 && typeof v.color === 'string' && /^#[\da-f]{6}$/i.test(v.color) && typeof v.important === 'boolean' && typeof v.description === 'string';
+  return typeof v.id === 'string' && typeof v.title === 'string' && v.title.trim().length > 0 && ['task', 'meeting'].includes(v.type) && typeof v.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v.date) && !isNaN(fromKey(v.date).getTime()) && dateKey(fromKey(v.date)) === v.date && typeof v.time === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(v.time) && Number.isFinite(v.duration) && v.duration >= 15 && v.duration <= 5256000 && typeof v.color === 'string' && /^#[\da-f]{6}$/i.test(v.color) && typeof v.important === 'boolean' && (typeof v.description === 'string' || typeof v.comment === 'string') && (v.completed === undefined || typeof v.completed === 'boolean') && (v.startAt === undefined || (Number.isFinite(Date.parse(v.startAt)) && Number.isFinite(Date.parse(v.endAt || '')) && Date.parse(v.endAt!) > Date.parse(v.startAt)));
 }
-export const helpText = 'Я понимаю команды:\nзадача Название; сегодня; 14:00\nвстреча Название; завтра; 10:00; 60\nВместо «сегодня» можно указать дату ГГГГ-ММ-ДД. Последнее число — длительность в минутах (по умолчанию 60). Добавьте «; важно» для важной записи. Команда «помощь» покажет эту подсказку.';
-export function parseCommand(input: string): { entry?: Entry; reply: string } {
+export const helpText = 'Я понимаю команды:\nзадача Название; сегодня; 14:00\nвстреча Название; завтра; 10:00; 60\nзадача Долгая работа; 2026-12-31; 23:00; 2027-01-02 02:00\nВместо «сегодня» можно указать дату ГГГГ-ММ-ДД. Последнее число — длительность в минутах (по умолчанию 60); можно указать дату и время окончания, как в третьем примере. Многодневные записи поддерживаются. Добавьте «; важно» для важной записи. Команда «помощь» покажет эту подсказку.';
+export function parseCommand(input: string, today = dateKey(new Date())): { entry?: Entry; end?: { date: string; time: string }; reply: string } {
   if (/^(помощь|help|команды)$/i.test(input.trim())) return { reply: helpText };
-  const match = input.trim().match(/^(задача|встреча)\s+([^;]+);\s*([^;]+);\s*([^;]+)(?:;\s*(\d+))?(?:;\s*(важно))?$/i);
+  const match = input.trim().match(/^(задача|встреча)\s+([^;]+);\s*([^;]+);\s*([^;]+)(?:;\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}|\d+))?(?:;\s*(важно))?$/i);
   if (!match) return { reply: 'Пока я работаю только с командами и не умею понимать свободные запросы.\n\n' + helpText };
   const [, type, title, day, time, duration, important] = match;
   const key = day.trim().toLowerCase();
-  const entry: Entry = { id: crypto.randomUUID(), title: title.trim(), type: type.toLowerCase() === 'задача' ? 'task' : 'meeting', date: key === 'сегодня' ? dateKey(new Date()) : key === 'завтра' ? dateKey(addDays(new Date(), 1)) : key, time: time.trim(), duration: duration ? Number(duration) : 60, important: !!important, color: colors[type.toLowerCase() === 'задача' ? 0 : 1], description: '' };
-  if (!validEntry(entry)) return { reply: 'Проверьте дату (ГГГГ-ММ-ДД), время (ЧЧ:ММ) и длительность. Минимум — 15 минут; запись должна завершаться до конца дня.' };
-  return { entry, reply: `Готово! ${entry.type === 'task' ? 'Задача' : 'Встреча'} «${entry.title}» добавлена на ${formatDate(fromKey(entry.date), { day: 'numeric', month: 'long' })} в ${entry.time}. Нажмите на карточку в календаре, чтобы изменить детали.` };
+  const end = duration?.includes('-') ? {date:duration.trim().split(/\s+/)[0],time:duration.trim().split(/\s+/)[1]} : undefined;
+  const entry: Entry = { id: crypto.randomUUID(), title: title.trim(), type: type.toLowerCase() === 'задача' ? 'task' : 'meeting', date: key === 'сегодня' ? today : key === 'завтра' ? dateKey(addDays(fromKey(today), 1)) : key, time: time.trim(), duration: end ? 60 : duration ? Number(duration) : 60, important: !!important, color: colors[type.toLowerCase() === 'задача' ? 0 : 1], description: '' };
+  if(end) {
+    if(dateKey(fromKey(end.date))!==end.date || !/^([01]\d|2[0-3]):[0-5]\d$/.test(end.time)) return {reply:'Проверьте дату и время окончания.'};
+    entry.duration=(Date.parse(`${end.date}T${end.time}:00Z`)-Date.parse(`${entry.date}T${entry.time}:00Z`))/60000;
+  }
+  if (!validEntry(entry)) return { reply: 'Проверьте дату (ГГГГ-ММ-ДД), время (ЧЧ:ММ) и длительность. Минимум — 15 минут.' };
+  return { entry, end, reply: `Готово! ${entry.type === 'task' ? 'Задача' : 'Встреча'} «${entry.title}» добавлена на ${formatDate(fromKey(entry.date), { day: 'numeric', month: 'long' })} в ${entry.time}. Нажмите на карточку в календаре, чтобы изменить детали.` };
 }

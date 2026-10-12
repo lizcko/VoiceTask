@@ -16,14 +16,13 @@ test('creates an important meeting with custom duration for tomorrow', () => {
   assert.equal(entry.important, true);
   assert.equal(entry.duration, 90);
 });
-test('rejects invalid dates and times, short and overnight entries', () => {
+test('rejects invalid dates and times, short entries', () => {
   for (const command of [
     'задача Тест; 2026-02-30; 10:00',
     'задача Тест; сегодня; 25:00',
     'задача Тест; сегодня; 10:60',
     'задача Тест; сегодня; 10:00; 0',
     'встреча Тест; сегодня; 10:00; 14',
-    'задача Тест; сегодня; 23:30; 60',
   ]) assert.equal(parseCommand(command).entry, undefined, command);
 });
 test('allows an entry ending exactly at midnight', () => {
