@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:voicetask:command:1",
+  "title": "VoiceTask assistant command",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["intent"],
+  "properties": {
+    "intent": {"enum": ["create_task", "create_meeting", "create_recurrence", "list_events", "search_events", "update_event", "delete_event", "complete_task", "reopen_task", "cancel_action", "answer_question", "open_event", "confirm_action"]},
+    "fields": {"$ref": "#/$defs/fields"},
+    "query": {"type": "string", "maxLength": 4000},
+    "id": {"type": "string", "maxLength": 4000},
+    "index": {"type": "integer", "minimum": 1, "maximum": 100},
+    "start": {"$ref": "#/$defs/day"},
+    "end": {"$ref": "#/$defs/day"},
+    "type": {"enum": ["task", "meeting"]},
+    "incomplete": {"type": "boolean"},
+    "free": {"type": "boolean"},
+    "scope": {"enum": ["one", "future", "all"]},
+    "answer": {"type": "string", "maxLength": 4000}
+  },
+  "$defs": {
+    "day": {"type": "string", "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+    "time": {"type": "string", "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"},
+    "recurrence": {
+      "type": "object", "additionalProperties": false, "required": ["frequency"],
+      "properties": {
+        "frequency": {"enum": ["daily", "weekly", "monthly"]},
+        "weekdays": {"type": "array", "minItems": 1, "maxItems": 7, "items": {"type": "integer", "minimum": 0, "maximum": 6}},
+        "until": {"$ref": "#/$defs/day"},
+        "ordinal": {"type": "integer", "minimum": 1, "maximum": 5},
+        "exceptions": {"type": "array", "items": {"$ref": "#/$defs/day"}}
+      },
+      "allOf": [{"if": {"required": ["ordinal"]}, "then": {"required": ["weekdays"], "properties": {"frequency": {"const": "monthly"}, "weekdays": {"maxItems": 1}}}}]
+    },
+    "fields": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "title": {"type": "string", "maxLength": 150},
+        "date": {"$ref": "#/$defs/day"}, "time": {"$ref": "#/$defs/time"},
+        "endDate": {"$ref": "#/$defs/day"}, "endTime": {"$ref": "#/$defs/time"},
+        "duration": {"type": "number", "minimum": 15, "maximum": 5256000},
+        "comment": {"type": "string", "maxLength": 4000},
+        "important": {"type": "boolean"}, "allDay": {"type": "boolean"},
+        "color": {"type": "string", "pattern": "^#[\\da-fA-F]{6}$"},
+        "recurrence": {"$ref": "#/$defs/recurrence"}
+      }
+    }
+  }
+}

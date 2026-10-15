@@ -1,4 +1,5 @@
-export type Entry = { id: string; title: string; type: 'task' | 'meeting'; date: string; time: string; duration: number; color: string; important: boolean; description: string; comment?: string; completed?: boolean; startAt?: string; endAt?: string };
+export type Recurrence = { frequency: 'daily' | 'weekly' | 'monthly'; weekdays?: number[]; until?: string; ordinal?: number; exceptions?: string[] };
+export type Entry = { id: string; title: string; type: 'task' | 'meeting'; date: string; time: string; duration: number; color: string; important: boolean; description: string; comment?: string; completed?: boolean; startAt?: string; endAt?: string; allDay?: boolean; recurrence?: Recurrence; sourceId?: string; occurrenceDate?: string; operationId?: string };
 export const colors = ['#ddd8f5', '#d8eae2', '#f7e5cf', '#d7e7f8', '#f2dce1'];
 export function dateKey(date: Date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
 export function fromKey(key: string) { return new Date(`${key}T12:00:00`); }

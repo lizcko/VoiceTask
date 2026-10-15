@@ -7,8 +7,9 @@
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "tsc src/calendar.ts src/model.ts --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --outDir .tools/test-build && node --test tests/calendar.test.mjs tests/model.test.mjs",
+    "test": "tsc src/calendar.ts src/model.ts src/assistantTypes.ts src/assistantEngine.ts src/localInterpreter.ts src/recurrence.ts src/speech.ts src/backendInterpreter.ts --target ES2022 --module ESNext --moduleResolution bundler --skipLibCheck --outDir .tools/test-build && node --test tests/calendar.test.mjs tests/model.test.mjs tests/assistant.test.mjs tests/speech.test.mjs",
     "typecheck": "tsc --noEmit",
+    "test:build": "node --test tests/build.test.mjs",
     "test:browser": "node tests/browser.test.mjs"
   },
   "dependencies": {

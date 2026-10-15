@@ -63,7 +63,7 @@ export function dueReminders(entries: Entry[], p: Preferences, now: number, seen
   if (!p.enabled) return [];
   const reminders: Reminder[] = [];
   for (const e of entries) {
-    if (e.completed || !(e.important && p.important || e.type === 'task' && p.tasks || e.type === 'meeting' && p.meetings)) continue;
+    if (e.allDay || e.completed || !(e.important && p.important || e.type === 'task' && p.tasks || e.type === 'meeting' && p.meetings)) continue;
     let start: number; try { start = e.startAt ? Date.parse(e.startAt) : Date.parse(toInstant(e.date, e.time, p.zone)); } catch { continue; }
     const delta = start - now; const overdue = delta < 0;
     if (overdue && e.type !== 'task' || delta > p.lead * 60000) continue;
