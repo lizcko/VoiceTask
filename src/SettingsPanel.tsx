@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { AlignLeft, AudioLines, Bell, CalendarDays, Check, List, ListCollapse, Monitor, Moon, Palette, Sun } from 'lucide-react';
-import { Preferences } from './model';
+import { Preferences, standardAppearance } from './model';
 
 type Section = 'Внешний вид' | 'Календарь' | 'Уведомления';
 type ChoiceKey = 'theme' | 'text' | 'density' | 'defaultPeriod';
 type ToggleKey = 'enabled' | 'tasks' | 'meetings' | 'important' | 'sound' | 'popup' | 'daily' | 'highlight' | 'weekNumbers';
-const accents = ['#7850ec', '#4c82f5', '#2ebd87', '#f56b91', '#f4a22e'];
+const accents = ['#805039', '#7850ec', '#4c82f5', '#2ebd87', '#f56b91', '#f4a22e'];
 const sections = [
   { title: 'Внешний вид' as const, icon: Palette, description: 'Настройте тему и визуальные параметры приложения' },
   { title: 'Календарь' as const, icon: CalendarDays, description: 'Настройте отображение календаря и параметры времени' },
@@ -23,7 +23,7 @@ export default function SettingsPanel({ value: p, update, weekend, setWeekend }:
     <div className="settings-choices">{options.map(option => {
       const Icon = option.icon;
       return <label key={option.value} className={`settings-choice ${p[key] === option.value ? 'is-selected' : ''}`}>
-        <input type="radio" name={key} value={option.value} checked={p[key] === option.value} onChange={() => set(key, option.value as never)} />
+        <input type="radio" name={key} value={option.value} checked={p[key] === option.value} onClick={() => {if(key==='theme'&&option.value==='system')update(standardAppearance(p));}} onChange={() => key==='theme'&&option.value==='system'?update(standardAppearance(p)):set(key, option.value as never)} />
         {Icon && <Icon aria-hidden="true" size={25} />}{key === 'text' && <span className={`text-size-sample ${option.value}`} aria-hidden="true">А</span>}
         <span>{option.label}</span>
       </label>;
@@ -44,13 +44,13 @@ export default function SettingsPanel({ value: p, update, weekend, setWeekend }:
   return <>
     <header className="settings-modal-header"><h2 id="modal-title">Настройки</h2><span>Ваш календарь — ваши правила</span></header>
     <div className="settings-layout">
-      <aside className="settings-sidebar"><div className="settings-brand"><span><AudioLines size={24} /></span>VoiceTask<span className="settings-brand-dot" /></div><p className="settings-nav-caption">НАСТРОЙКИ</p>
+      <aside className="settings-sidebar"><div className="settings-brand"><span><AudioLines size={24} /></span>ВОКСА<span className="settings-brand-dot" /></div><p className="settings-nav-caption">НАСТРОЙКИ</p>
         <nav aria-label="Разделы настроек">{sections.map(({ title, icon: Icon }) => <button key={title} className={section === title ? 'selected' : ''} aria-current={section === title ? 'page' : undefined} onClick={() => setSection(title)}><Icon size={21} /><span>{title}</span></button>)}</nav>
       </aside>
       <div className="settings-content" key={section}>
         <header className="settings-section-heading"><span className="settings-section-icon"><SectionIcon size={25} /></span><div><h3>{section}</h3><p>{selectedSection.description}</p></div></header>
         {section === 'Внешний вид' && <div className="settings-cards">
-          {choices('theme', 'Тема приложения', [{ value: 'light', label: 'Светлая', icon: Sun }, { value: 'dark', label: 'Тёмная', icon: Moon }, { value: 'system', label: 'Как в системе', icon: Monitor }])}
+          {choices('theme', 'Тема приложения', [{ value: 'light', label: 'Светлая', icon: Sun }, { value: 'dark', label: 'Тёмная', icon: Moon }, { value: 'system', label: 'Стандартная (ВОКСА)', icon: Monitor }])}
           <div className="settings-two-columns appearance-columns"><section className="settings-card accent-card"><h4>Основной цвет</h4><p className="settings-description">Выберите цвет акцентов и активных элементов</p><div className="settings-palette">{accents.map(color => <button key={color} type="button" aria-label={`Акцент ${color}`} aria-pressed={p.accent.toLowerCase() === color} className={`accent-swatch ${p.accent.toLowerCase() === color ? 'is-selected' : ''}`} style={{ backgroundColor: color }} onClick={() => set('accent', color)}>{p.accent.toLowerCase() === color && <Check size={15} />}</button>)}<label className={`accent-custom ${!accents.includes(p.accent.toLowerCase()) ? 'is-selected' : ''}`} title="Свой основной цвет"><Palette size={21} /><input type="color" aria-label="Свой основной цвет" value={p.accent} onChange={e => set('accent', e.target.value)} /></label></div></section>
             {choices('text', 'Размер текста', [{ value: 'small', label: 'Маленький' }, { value: 'medium', label: 'Средний' }, { value: 'large', label: 'Большой' }], 'Настройте размер шрифта в интерфейсе', true)}
           </div>

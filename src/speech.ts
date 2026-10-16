@@ -12,14 +12,54 @@ export function recognitionError(code:string) {
 export function startRecognition(host:SpeechWindow,onText:(s:string)=>void,onState:(active:boolean)=>void,onError:(s:string)=>void) {
   const Constructor=host.SpeechRecognition||host.webkitSpeechRecognition;
   if(!Constructor){onError('Браузер не поддерживает голосовой ввод. Используйте текстовый режим.');return null;}
-  const r=new Constructor();let cancelled=false,received=false,failed=false;
-  r.lang='ru-RU';r.continuous=false;r.interimResults=false;
+  const r=new Constructor();
+  let active=true, cancelled=false, running=false, prefix='', current='', final='', emptyEnds=0;
+  let restart:ReturnType<typeof setTimeout>|undefined, timeout:ReturnType<typeof setTimeout>|undefined;
+  let resolveStop:((text:string)=>void)|undefined;
+  let attempts:number[]=[];
+  const join=(a:string,b:string)=>[a,b].filter(Boolean).join(' ').trim();
+  const finish=()=>{if(timeout)clearTimeout(timeout);onState(false);resolveStop?.(join(prefix,current));resolveStop=undefined;};
+  const launch=()=>{
+    if(!active||cancelled||running)return;
+    attempts=attempts.filter(time=>Date.now()-time<10000);
+    if(attempts.length>=10){active=false;onError('Распознавание слишком часто прерывается. Текст сохранён. Включите микрофон снова или используйте текстовый ввод.');finish();return;}
+    attempts.push(Date.now());running=true;current='';final='';
+    try{r.start();}catch{running=false;active=false;onError('Не удалось включить микрофон. Проверьте разрешения браузера.');finish();}
+  };
+  r.lang='ru-RU';r.continuous=true;r.interimResults=true;
   r.onstart=()=>{if(!cancelled)onState(true);};
-  r.onresult=e=>{if(cancelled)return;const transcript=Array.from(e.results).filter(result=>result.isFinal).map(result=>result[0].transcript).join(' ').trim();if(transcript){received=true;onText(transcript);}};
-  r.onerror=e=>{if(!cancelled){failed=true;onError(recognitionError(e.error));}onState(false);};
-  r.onend=()=>{onState(false);if(!cancelled&&!failed&&!received)onError(recognitionError('no-speech'));};
-  try{onState(true);r.start();}catch{onState(false);onError('Не удалось включить микрофон. Проверьте разрешения браузера.');return null;}
-  return {stop:()=>{try{r.stop();}catch{onState(false);}},cancel:()=>{cancelled=true;r.abort();onState(false);}};
+  r.onresult=e=>{
+    if(cancelled)return;
+    const results=Array.from(e.results);
+    final=results.filter(result=>result.isFinal).map(result=>result[0].transcript.trim()).filter(Boolean).join(' ');
+    const interim=results.filter(result=>!result.isFinal).map(result=>result[0].transcript.trim()).filter(Boolean).join(' ');
+    current=join(final,interim);onText(join(prefix,current));
+  };
+  r.onerror=e=>{
+    if(cancelled)return;
+    if(e.error==='no-speech')return; // onend performs the bounded restart.
+    active=false;onError(recognitionError(e.error));finish();
+  };
+  r.onend=()=>{
+    running=false;
+    if(cancelled)return;
+    if(!active){finish();return;}
+    emptyEnds=current?0:emptyEnds+1;
+    prefix=join(prefix,current);current='';final='';
+    if(emptyEnds>=3){active=false;onError(recognitionError('no-speech'));finish();return;}
+    restart=setTimeout(launch,300);
+  };
+  onState(true);launch();
+  return {
+    stop:()=>new Promise<string>(resolve=>{
+      active=false;if(restart)clearTimeout(restart);resolveStop=resolve;
+      if(!running){finish();return;}
+      // Browsers may deliver a final result between stop() and onend.
+      timeout=setTimeout(()=>{cancelled=true;try{r.abort();}catch{/* already ended */}finish();},700);
+      try{r.stop();}catch{finish();}
+    }),
+    cancel:()=>{active=false;cancelled=true;if(restart)clearTimeout(restart);try{r.abort();}catch{/* already ended */}finish();}
+  };
 }
 export function speakRussian(text:string,synth:SpeechSynthesis|undefined,makeUtterance:(s:string)=>SpeechSynthesisUtterance,onState:(active:boolean)=>void,onError:(s:string)=>void) {
   if(!synth){onError('Озвучивание недоступно в этом браузере. Ответ остаётся в чате.');return;}

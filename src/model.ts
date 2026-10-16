@@ -5,7 +5,7 @@ export type Preferences = {
   taskColor: string; meetingColor: string; highlight: boolean; weekNumbers: boolean;
   enabled: boolean; lead: number; tasks: boolean; meetings: boolean; important: boolean; sound: boolean; popup: boolean; daily: boolean;
 };
-export const defaults: Preferences = { theme: 'light', accent: '#514b91', text: 'medium', density: 'standard', zone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Moscow', defaultPeriod: 'Неделя', hourStart: 0, hourEnd: 24, dateFormat: 'DD.MM.YYYY', taskColor: '#ddd8f5', meetingColor: '#d8eae2', highlight: true, weekNumbers: false, enabled: true, lead: 15, tasks: true, meetings: true, important: true, sound: false, popup: true, daily: false };
+export const defaults: Preferences = { theme: 'system', accent: '#805039', text: 'medium', density: 'standard', zone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Moscow', defaultPeriod: 'Неделя', hourStart: 0, hourEnd: 24, dateFormat: 'DD.MM.YYYY', taskColor: '#ddd8f5', meetingColor: '#d8eae2', highlight: true, weekNumbers: false, enabled: true, lead: 15, tasks: true, meetings: true, important: true, sound: false, popup: true, daily: false };
 export const ENTRY_KEY = 'voicetask.entries.v1';
 export function readJSON<T>(key: string, fallback: T): T { try { const raw = localStorage.getItem(key); return raw === null ? fallback : JSON.parse(raw); } catch { return fallback; } }
 export function writeJSON(key: string, value: unknown) { localStorage.setItem(key, JSON.stringify(value)); }
@@ -74,3 +74,6 @@ export function dueReminders(entries: Entry[], p: Preferences, now: number, seen
   return reminders;
 }
 export { validEntry, dateKey };
+
+// Reset appearance only; calendar, record colors, notifications and profile are retained.
+export function standardAppearance(p: Preferences): Preferences { return {...p,theme:"system",accent:"#805039",text:"medium",density:"standard"}; }

@@ -26,7 +26,7 @@ export function seedEntries(): Entry[] {
 export function validEntry(value: unknown): value is Entry {
   if (!value || typeof value !== 'object') return false;
   const v = value as Entry;
-  return typeof v.id === 'string' && typeof v.title === 'string' && v.title.trim().length > 0 && ['task', 'meeting'].includes(v.type) && typeof v.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v.date) && !isNaN(fromKey(v.date).getTime()) && dateKey(fromKey(v.date)) === v.date && typeof v.time === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(v.time) && Number.isFinite(v.duration) && v.duration >= 15 && v.duration <= 5256000 && typeof v.color === 'string' && /^#[\da-f]{6}$/i.test(v.color) && typeof v.important === 'boolean' && (typeof v.description === 'string' || typeof v.comment === 'string') && (v.completed === undefined || typeof v.completed === 'boolean') && (v.startAt === undefined || (Number.isFinite(Date.parse(v.startAt)) && Number.isFinite(Date.parse(v.endAt || '')) && Date.parse(v.endAt!) > Date.parse(v.startAt)));
+  return typeof v.id === 'string' && typeof v.title === 'string' && v.title.trim().length > 0 && ['task', 'meeting'].includes(v.type) && typeof v.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v.date) && !isNaN(fromKey(v.date).getTime()) && dateKey(fromKey(v.date)) === v.date && typeof v.time === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(v.time) && Number.isFinite(v.duration) && v.duration >= 5 && v.duration <= 5256000 && typeof v.color === 'string' && /^#[\da-f]{6}$/i.test(v.color) && typeof v.important === 'boolean' && (typeof v.description === 'string' || typeof v.comment === 'string') && (v.completed === undefined || typeof v.completed === 'boolean') && (v.startAt === undefined || (Number.isFinite(Date.parse(v.startAt)) && Number.isFinite(Date.parse(v.endAt || '')) && Date.parse(v.endAt!) > Date.parse(v.startAt)));
 }
 export const helpText = 'Я понимаю команды:\nзадача Название; сегодня; 14:00\nвстреча Название; завтра; 10:00; 60\nзадача Долгая работа; 2026-12-31; 23:00; 2027-01-02 02:00\nВместо «сегодня» можно указать дату ГГГГ-ММ-ДД. Последнее число — длительность в минутах (по умолчанию 60); можно указать дату и время окончания, как в третьем примере. Многодневные записи поддерживаются. Добавьте «; важно» для важной записи. Команда «помощь» покажет эту подсказку.';
 export function parseCommand(input: string, today = dateKey(new Date())): { entry?: Entry; end?: { date: string; time: string }; reply: string } {
@@ -41,6 +41,6 @@ export function parseCommand(input: string, today = dateKey(new Date())): { entr
     if(dateKey(fromKey(end.date))!==end.date || !/^([01]\d|2[0-3]):[0-5]\d$/.test(end.time)) return {reply:'Проверьте дату и время окончания.'};
     entry.duration=(Date.parse(`${end.date}T${end.time}:00Z`)-Date.parse(`${entry.date}T${entry.time}:00Z`))/60000;
   }
-  if (!validEntry(entry)) return { reply: 'Проверьте дату (ГГГГ-ММ-ДД), время (ЧЧ:ММ) и длительность. Минимум — 15 минут.' };
+  if (!validEntry(entry)) return { reply: 'Проверьте дату (ГГГГ-ММ-ДД), время (ЧЧ:ММ) и длительность. Минимум — 5 минут.' };
   return { entry, end, reply: `Готово! ${entry.type === 'task' ? 'Задача' : 'Встреча'} «${entry.title}» добавлена на ${formatDate(fromKey(entry.date), { day: 'numeric', month: 'long' })} в ${entry.time}. Нажмите на карточку в календаре, чтобы изменить детали.` };
 }

@@ -21,7 +21,7 @@ export function validateCommand(raw:unknown):Command {
     const f=raw.fields;
     for(const k of ['date','endDate'])if(f[k]!==undefined&&!validDay(f[k]))throw Error('Некорректная дата.');
     for(const k of ['time','endTime'])if(f[k]!==undefined&&(typeof f[k]!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(f[k] as string)))throw Error('Некорректное время.');
-    if(f.duration!==undefined&&(typeof f.duration!=='number'||!Number.isFinite(f.duration)||f.duration<15||f.duration>5256000))throw Error('Продолжительность должна быть от 15 минут до 10 лет.');
+    if(f.duration!==undefined&&(typeof f.duration!=='number'||!Number.isFinite(f.duration)||f.duration<5||f.duration>5256000))throw Error('Продолжительность должна быть от 5 минут до 10 лет.');
     for(const k of ['title','comment'])if(f[k]!==undefined&&(typeof f[k]!=='string'||(f[k] as string).length>(k==='title'?150:4000)))throw Error('Слишком длинный текст.');
     for(const k of ['important','allDay'])if(f[k]!==undefined&&typeof f[k]!=='boolean')throw Error('Недопустимый признак записи.');
     if(f.color!==undefined&&(typeof f.color!=='string'||!/^#[\da-f]{6}$/i.test(f.color)))throw Error('Некорректный цвет.');

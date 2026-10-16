@@ -8,7 +8,7 @@
 .day-view .day-headers,.day-view .time-scroll{min-width:0}.day-view .event-card{max-width:100%;padding:10px 14px}.day-view .event-card strong{font-size:12px}.day-view .event-top{font-size:10px}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 /* VoiceTask 2: preserve the original layout and user event colors. */
-:root{--accent:#514b91;--surface:#fff;--page:#f4f6fa;--ink:#26344d;--muted:#58677f;--border:#d6ddea;font-size:16px;color-scheme:light}
+:root{--accent:#805039;--surface:#fff;--page:#FAF6F0;--ink:#30231E;--muted:#78665C;--border:#E6D8CD;--brand:#4B2E23;--panel:#F2E7DC;font-size:16px;color-scheme:light}
 :root[data-text=small]{font-size:14px}:root[data-text=large]{font-size:18px}
 :root[data-theme=dark]{--surface:#202a3c;--page:#151d2c;--ink:#edf1fc;--muted:#b8c5dd;--border:#46546a;color-scheme:dark}
 body{font-size:1rem;color:var(--ink);background:var(--page)}button,input,textarea,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
@@ -145,3 +145,41 @@ main,.workspace{background:var(--page)}.topbar,.calendar,.modal,.chat{background
 .message-bubble{overflow-wrap:anywhere;white-space:pre-wrap}.message-error{border:1px solid #bd5555}.chat-entry-link{display:block;color:var(--accent);font-size:.75rem;padding:4px 0;text-align:left}.voice-controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;font-size:.7rem;color:var(--muted)}.voice-controls button[aria-pressed=true]{color:var(--accent)}.speech-note{display:block;font-size:.6rem;color:var(--muted);line-height:1.4;margin-top:5px}.mic.recording{background:#f2dce1;color:#9c3030}.chat-confirm{font-size:.8rem;padding:8px;background:var(--page);border-radius:8px}.chat-confirm button{padding:5px 10px;color:var(--accent)}.untimed-row{display:grid;border-bottom:1px solid var(--border);max-height:150px;overflow:auto}.untimed-row>div{border-left:1px solid var(--border);padding:4px;min-width:0}.untimed-row>small{font-size:.65rem;padding:8px;color:var(--muted)}.untimed-row .event-card{margin-bottom:4px}.chat-heading .icon-button{flex-shrink:0;width:25px}.chat-heading>div{min-width:0}.chat-heading strong{overflow-wrap:anywhere}.chat-compose [role=status]{font-size:.75rem}.chat-compose [role=status] button{padding:5px;color:var(--accent)}
 
 .chat-heading{display:grid;grid-template-columns:32px minmax(0,1fr) 25px 25px;gap:6px;padding:16px 10px}.chat-heading>div{min-width:0}.chat-heading strong{display:block;white-space:normal;overflow-wrap:anywhere}.chat-heading .assistant-avatar{width:30px;height:30px}
+/* ВОКСА: shared brand tokens, preserving individual entry backgrounds. */
+.assistant-panel,.settings-sidebar{background:var(--brand)}
+.assistant-caption,.sidebar-footer{color:#e0cec1}
+.brand{letter-spacing:.01em;margin-bottom:26px;min-height:80px;color:white}
+.brand-name{font-weight:750!important;color:white!important;font-size:1.8rem}
+.brand-name small{display:block;font-size:.8rem;font-weight:400;letter-spacing:0;margin-top:5px;color:#e0cec1}
+.brand-dot{color:#d8bda9}.assistant-avatar,.message-avatar{background:var(--panel);color:var(--accent)}
+.settings-sidebar nav button.selected{background:#FAF6F0;color:var(--brand)}
+.settings-brand{color:#fff}.settings-brand>span:first-child{background:var(--panel);color:var(--brand)}
+.current-column{background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+.day-header.current b,.is-today,.date-number.is-today{background:var(--accent);color:#fff}
+.day-header.current>span,.calendar-title>svg{color:var(--accent)}
+.day-column,.hour-slot,.day-headers{border-color:var(--border)}
+.time-labels{background:var(--surface)}.now-line{background:var(--accent)}
+.event-position{container-type:inline-size}
+.event-card .card-open,.important-card .card-open{padding:7px 9px 7px 29px;justify-content:flex-start;gap:3px;overflow:auto}
+.event-card strong,.day-view .event-card strong{font-size:.85rem;line-height:1.25;flex-shrink:0}
+.event-top{order:0;margin-bottom:0;font-size:.7rem;gap:3px}
+.event-type{font-size:.68rem;line-height:1.2}
+.event-position .importance-mark,.importance-mark,.compact .importance-mark{font-size:15px;top:31px;left:8px;bottom:auto;line-height:1;display:block}
+.event-position .completion,.completion,.important-card .completion{top:8px;left:6px;width:17px;height:17px}
+.card-comment{font-size:.75rem;margin-top:3px}
+@container (width < 140px){.event-position .card-open{padding:6px 5px 6px 25px}.event-position strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}.event-position .card-comment{display:none}.event-top svg{width:12px;height:12px}.event-type{font-size:.68rem}}
+.period-trigger{display:inline-flex;align-items:center;gap:10px;font:inherit;text-align:left;text-transform:capitalize;border-radius:6px;padding:4px;color:var(--ink)}
+.period-trigger:hover{background:var(--page)}
+.period-wheels{display:flex;gap:16px;margin-top:20px}
+.period-wheel{flex:1;min-width:0;height:205px;overflow:auto;scroll-snap-type:y proximity;border:1px solid var(--border);border-radius:10px;overscroll-behavior:contain;padding:5px}
+.period-wheel button{display:block;width:100%;padding:11px 8px;border-radius:6px;scroll-snap-align:center;text-transform:capitalize}
+.period-wheel [aria-selected=true]{background:var(--accent);color:#fff;font-weight:600}
+.year-range{display:flex;justify-content:space-between;gap:12px;margin:12px 0;font-size:.8rem;color:var(--accent)}
+.picker-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;margin:16px 0}
+.picker-days span{font-size:.8rem;color:var(--muted)}.picker-days button{padding:9px 2px;border-radius:7px}.picker-days .muted{color:var(--muted)}.picker-days .today{box-shadow:inset 0 0 0 1px var(--accent)}.picker-days .selected{background:var(--accent);color:white}
+.delete-button{border:1px solid #b3293d;color:#b3293d;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 16px;min-height:46px;font-size:1rem}
+.delete-button:hover{background:#b3293d12}.delete-confirm h2{font-size:22px}.delete-confirm p{font-size:16px}.delete-confirm .modal-actions button{font-size:16px}
+.event-position .event-card strong{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-height:2.5em}
+.chat-heading>.icon-button,.chat-compose textarea::placeholder{color:var(--muted)}
+.chat-compose form:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.settings-nav-caption{color:#e0cec1}

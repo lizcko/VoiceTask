@@ -22,7 +22,7 @@ test('rejects invalid dates and times, short entries', () => {
     'задача Тест; сегодня; 25:00',
     'задача Тест; сегодня; 10:60',
     'задача Тест; сегодня; 10:00; 0',
-    'встреча Тест; сегодня; 10:00; 14',
+    'встреча Тест; сегодня; 10:00; 4',
   ]) assert.equal(parseCommand(command).entry, undefined, command);
 });
 test('allows an entry ending exactly at midnight', () => {

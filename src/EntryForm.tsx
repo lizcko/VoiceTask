@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import { Check, Trash2, Palette, Pipette } from 'lucide-react';
+import { Check, Palette, Pipette } from 'lucide-react';
 import { Entry, colors, validEntry } from './calendar';
 import { commentOf, endParts, toInstant, wallParts } from './model';
 import { validRecurrence } from './recurrence';
-export default function EntryForm({ initial, exists, zone, taskColor, meetingColor, save, remove }: { initial: Entry; exists: boolean; zone: string; taskColor: string; meetingColor: string; save: (entry: Entry)=>void; remove: ()=>void }) {
+export default function EntryForm({ initial, exists, zone, taskColor, meetingColor, save }: { initial: Entry; exists: boolean; zone: string; taskColor: string; meetingColor: string; save: (entry: Entry)=>void }) {
   const [entry,set] = useState({...initial,duration:initial.startAt?(Date.parse(initial.endAt!)-Date.parse(initial.startAt))/60000:initial.duration});
   const [mode,setMode] = useState('end');
   const [end,setEnd] = useState(endParts(initial));
   const [errors,setErrors] = useState<Record<string,string>>({});
-  const [confirmDelete,setConfirmDelete]=useState(false);
   const zoned=!!initial.startAt||!exists;
   const resolveStart = (value: Entry) => initial.startAt&&value.date===initial.date&&value.time===initial.time?initial.startAt:toInstant(value.date,value.time,zone);
   const resolveEnd = () => {
@@ -27,7 +26,7 @@ export default function EntryForm({ initial, exists, zone, taskColor, meetingCol
     if(!/^#[\da-f]{6}$/i.test(entry.color)) e.color='Выберите цвет в формате #RRGGBB';
     if(entry.recurrence&&(!validRecurrence(entry.recurrence)||entry.recurrence.until&&entry.recurrence.until<entry.date))e.end='Проверьте правило повторения и дату окончания';
     const duration=entry.allDay?1440:mode==='end'?localDuration():entry.duration;
-    if(!Number.isFinite(duration)||duration<15||duration>5256000) e.end='Продолжительность от 15 минут до 10 лет; окончание должно быть позже начала';
+    if(!Number.isFinite(duration)||duration<5||duration>5256000) e.end='Продолжительность от 5 минут до 10 лет; окончание должно быть позже начала';
     const candidate={...entry,duration,description:commentOf(entry)};
     if(entry.allDay){candidate.time='00:00';delete candidate.startAt;delete candidate.endAt;}
     if (!validEntry(candidate) && !Object.keys(e).length) e.start='Проверьте дату и время начала';
@@ -60,7 +59,6 @@ export default function EntryForm({ initial, exists, zone, taskColor, meetingCol
     <div className="color-label">Цвет записи</div><div className="color-options">{colors.map(c=><button key={c} type="button" aria-label={`Цвет ${c}`} aria-pressed={entry.color===c} className={entry.color===c?'selected':''} style={{background:c}} onClick={()=>change({color:c})}>{entry.color===c&&<Check size={16}/>}</button>)}<label className="custom-color" title="Свой цвет"><Palette size={18}/><Pipette size={16}/><input aria-label="Свой цвет" type="color" value={entry.color} onChange={e=>change({color:e.target.value})}/></label></div>{error('color')}<div className="color-preview" style={{background:entry.color}}>Предпросмотр: {entry.title||'Новая запись'}</div>
     <label className="checkbox-label"><input type="checkbox" checked={entry.important} onChange={e=>change({important:e.target.checked})}/>Важная запись</label>
     {entry.type==='task'&&<label className="checkbox-label"><input type="checkbox" checked={!!entry.completed} onChange={e=>change({completed:e.target.checked})}/>Задача выполнена</label>}
-    {confirmDelete&&<div className="error" role="alert"><p>Удалить «{entry.title}»?</p><button type="button" onClick={remove}>Подтвердить удаление</button><button type="button" onClick={()=>setConfirmDelete(false)}>Отмена</button></div>}
-    <div className="modal-actions">{exists&&<button type="button" className="delete-button" onClick={()=>setConfirmDelete(true)}><Trash2 size={16}/>Удалить</button>}<button type="submit" className="primary-button"><Check size={16}/>Сохранить</button></div>
+    <div className="modal-actions"><button type="submit" className="primary-button"><Check size={16}/>Сохранить</button></div>
   </form>;
 }
